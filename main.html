@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Modern Button Links</title>
+  <style>
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 20px;
+      padding: 40px;
+      background: #f0f2f5;
+      transition: background 0.3s, color 0.3s;
+    }
+    .btn {
+      padding: 15px 25px;
+      border: none;
+      border-radius: 12px;
+      font-size: 18px;
+      cursor: pointer;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+      background: linear-gradient(135deg, #4e54c8, #8f94fb);
+      color: white;
+      text-decoration: none;
+      box-shadow: 0 5px 12px rgba(0, 0, 0, 0.15);
+      margin: 10px;
+      opacity: 0;
+      transform: scale(0);
+      flex: 0 0 auto;
+    }
+    .btn.show {
+      opacity: 1;
+      transform: scale(1);
+    }
+    .tabs {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-bottom: 25px;
+    }
+    .tab {
+      padding: 12px 22px;
+      border: none;
+      border-radius: 25px;
+      font-size: 18px;
+      cursor: pointer;
+      background: #ffffff;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      transition: 0.3s;
+    }
+    .tab:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    }
+    .tab.active {
+      background: linear-gradient(135deg, #4e54c8, #8f94fb);
+      color: white;
+      font-weight: bold;
+      box-shadow: 0 8px 18px rgba(0, 0, 0, 0.2);
+    }
+    .category {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 20px;
+      max-width: 840px;
+      transition: opacity 0.3s ease;
+    }
+    .dark {
+      background-color: #1e1e1e;
+      color: white;
+    }
+    .dark .tab {
+      background: #2c2c2c;
+      color: #e7e7e7;
+    }
+    .dark .tab.active {
+      background: linear-gradient(135deg, #8f94fb, #4e54c8);
+    }
+    .dark .btn {
+      background: linear-gradient(135deg, #5c5fc8, #9da1ff);
+    }
+  </style>
+</head>
+<body>
+  <div class="tabs">
+    <button class="tab" onclick="showCat(1)">🎮 games</button>
+    <button class="tab" onclick="showCat(2)">🔧 tools</button>
+    <button class="tab" onclick="showCat(3)">👻 bad stuff</button>
+  </div>
+
+<div id="cat1" class="category">
+    <button class="btn" onclick=openFile1()>survival race</button>
+    <button class="btn" onclick=openFile2()>drive mad</button>
+    <button class="btn" onclick=openFile3()>snake game</button>
+    <button class="btn" onclick=openFile4()>Site 14</button>
+    <button class="btn" onclick=openFile5()>Site 15</button>
+    <button class="btn" onclick=openFile6()>Site 16</button>
+    <button class="btn" onclick=openFile7()>Site 17</button>
+    <button class="btn" onclick=openFile8()>Site 18</button>
+    <button class="btn" onclick=openFile9()>Site 19</button>
+    <button class="btn" onclick=openFile10()>Site 20</button>
+</div>
+
+<div id="cat2" class="category" style="display:none;">
+    <button class="btn" onclick=openFile11()>bleutooth scanner</button>
+    <button class="btn" onclick=openFile12()>ofline text editor</button>
+    <button class="btn" onclick=openFile13()>Site 13</button>
+    <button class="btn" onclick=openFile14()>Site 14</button>
+    <button class="btn" onclick=openFile15()>Site 15</button>
+    <button class="btn" onclick=openFile16()>Site 16</button>
+    <button class="btn" onclick=openFile17()>Site 17</button>
+    <button class="btn" onclick=openFile18()>Site 18</button>
+    <button class="btn" onclick=openFile19()>Site 19</button>
+</div>
+
+<div id="cat3" class="category" style="display:none;">
+    <button class="btn" onclick=openFile21()>Site 21</button>
+    <button class="btn" onclick=openFile22()>Site 22</button>
+    <button class="btn" onclick=openFile23()>Site 23</button>
+    <button class="btn" onclick=openFile24()>Site 24</button>
+    <button class="btn" onclick=openFile25()>Site 25</button>
+    <button class="btn" onclick=openFile26()>Site 26</button>
+    <button class="btn" onclick=openFile27()>Site 27</button>
+    <button class="btn" onclick=openFile28()>Site 28</button>
+    <button class="btn" onclick=openFile29()>Site 29</button>
+    <button class="btn" onclick=openFile30()>Site 30</button>
+</div>
+
+
+  <script>
+    const tabs = document.querySelectorAll('.tab');
+    const categories = [document.getElementById('cat1'), document.getElementById('cat2'), document.getElementById('cat3')];
+
+    function showCat(num){
+      categories.forEach((cat, i) => {
+        const buttons = cat.querySelectorAll('.btn');
+        if(i === num-1){
+          cat.style.display = 'flex';
+          buttons.forEach((b, idx) => {
+            setTimeout(() => b.classList.add('show'), idx * 50);
+          });
+        } else {
+          cat.style.display = 'none';
+          buttons.forEach(b => b.classList.remove('show'));
+        }
+      });
+      tabs.forEach((t, i) => t.classList.toggle('active', i===num-1));
+    }
+
+    if(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches){
+      document.body.classList.add('dark');
+    }
+
+    showCat(1);
+    
+          function openFile1() {
+          const fileToOpen = "needed_html_files/survival_race.html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile2() {
+          const fileToOpen = "needed_html_files/drive_mad/drive_mad.html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile3() {
+          const fileToOpen = "needed_html_files/snake_game/snake_game.html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile4() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile5() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile6() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile7() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile8() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile9() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile10() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile11() {
+          const fileToOpen = "needed_html_files/bleutooth_scanner.html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile12() {
+          const fileToOpen = "needed_html_files/text_editor.html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile13() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile14() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile15() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile16() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile17() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile18() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile19() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile20() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile21() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile22() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile23() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile24() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile25() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile26() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile27() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile28() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile29() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+                function openFile30() {
+          const fileToOpen = ".html"; // <-- change this to your other HTML file
+          window.open(fileToOpen, "_blank"); // Opens in a new tab
+      }
+  </script>
+</body>
+</html>
