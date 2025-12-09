@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="en">
+<head>
+<link rel="icon" type="image/x-icon" href="https://githubraw.com/jonasArduino/bleutooth/main/bleutooth.ico">
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>bleutooth scanner</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+html,body{height:100%;margin:0;padding:0;overflow-x:hidden;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,sans-serif;}
+button{background-color:black !important; color:white !important;}
+button:hover{opacity:0.85 !important;}
+.connect-btn, .analyze-btn{flex-shrink:0; white-space:nowrap;}
+.background-wrapper {position: fixed;top: 0;left: 0;width: 100%;height: 100%;overflow: hidden;z-index: -1;}
+.gradient-shape {position: absolute;width: 1000px;height: 1000px;border-radius: 50%;filter: blur(140px);opacity: 0.6;animation: float infinite ease-in-out;}
+.shape1 { background: #ff6b6b; top: -250px; left: -250px; animation-duration: 24s; }
+.shape2 { background: #6b8bff; bottom: -300px; right: -250px; animation-duration: 28s; }
+.shape3 { background: #9b6bff; top: 40%; left: 25%; animation-duration: 32s; }
+@keyframes float {0%,100% { transform: translateY(0) translateX(0); }50% { transform: translateY(50px) translateX(50px); }}
+#loadingOverlay { display: none; position: fixed; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.6); z-index: 50; justify-content: center; align-items: center; color: white; font-size: 1.5rem; font-weight: bold; }
+.loader { border: 8px solid rgba(255,255,255,0.3); border-top: 8px solid white; border-radius: 50%; width: 60px; height: 60px; animation: spin 1s linear infinite; margin-right: 15px; }
+@keyframes spin {0% { transform: rotate(0deg); }100% { transform: rotate(360deg); }}
+.log-container { position: relative; width: 100%; max-width: 6xl; }
+#btn-download-log { position: absolute; top: 0.75rem; right: 0.75rem; background: transparent !important; border: none; cursor: pointer; padding: 0.25rem; }
+#btn-download-log svg { width: 1.5rem; height: 1.5rem; color: white; }
+</style>
+</head>
+<body>
+<div class="background-wrapper">
+  <div class="gradient-shape shape1"></div>
+  <div class="gradient-shape shape2"></div>
+  <div class="gradient-shape shape3"></div>
+</div>
+<div id="loadingOverlay" class="flex">
+  <div class="loader"></div>Connecting...
+</div>
+<div class="min-h-screen flex flex-col items-center p-6 relative z-10">
+<header class="w-full max-w-6xl mb-8">
+<h1 class="text-4xl font-bold text-white text-center mb-2 drop-shadow-lg">Bluetooth Scanner</h1>
+<p class="text-center text-gray-200 drop-shadow">Scan, analyze, and explore BLE device</p>
+<p class="text-center text-gray-200 drop-shadow">developer: BueKoala27</p>
+</header>
+<div class="flex flex-wrap justify-center gap-4 mb-8">
+<button id="btn-chooser" class="px-6 py-3 rounded-full shadow font-semibold">start searching</button>
+</div>
+<div id="status" class="mb-6 text-white drop-shadow"></div>
+<div id="devices" class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl"></div>
+<h2 class="text-3xl font-semibold mt-10 mb-4 text-black drop-shadow">Log</h2>
+<div class="log-container w-full max-w-6xl">
+  <pre id="log" class="bg-black bg-opacity-20 backdrop-blur-md rounded-3xl shadow-inner p-6 h-96 overflow-auto text-black font-mono"></pre>
+  <button id="btn-download-log" title="Download Log">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3" />
+    </svg>
+  </button>
+</div>
+</div>
+<script>
+const logEl=document.getElementById('log');
+const devicesEl=document.getElementById('devices');
+const loadingOverlay=document.getElementById('loadingOverlay');
+let seen=new Map();
+let leScan=null;
+function log(...a){logEl.textContent=a.join(' ')+'\n'+logEl.textContent;console.log(...a);}
+function downloadLog(){ const blob=new Blob([logEl.textContent], {type:'text/plain'}); const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='ble_log.txt'; a.click();}
+document.getElementById('btn-download-log').onclick=downloadLog;
+function renderDevices(){
+ devicesEl.innerHTML='';
+ for(const [id,info] of seen.entries()){
+   if(!info.rssiHistory) info.rssiHistory=[];
+   const card=document.createElement('div');
+   card.className='bg-white bg-opacity-20 backdrop-blur-md rounded-3xl p-5 flex flex-col justify-between transition-transform transform hover:scale-105 shadow-lg';
+   card.dataset.id=id;
+   card.innerHTML=`<div class="flex justify-between items-center mb-3 flex-wrap"><div><h3 class="text-xl font-semibold text-black drop-shadow">${info.name||'(no name)'}</h3><p class="text-black-200 text-sm drop-shadow">ID: ${id}</p></div><div class="flex gap-2 flex-wrap"><button class="connect-btn px-3 py-1 rounded-full font-medium transition-all">Connect</button><button class="analyze-btn px-3 py-1 rounded-full font-medium transition-all">Analyze</button></div></div><div class="text-black-200 text-sm mb-2 drop-shadow">RSSI: ${info.rssi??'—'} | TX: ${info.txPower??'—'} | Distance: ${info.distance?info.distance.toFixed(2)+'m':''}</div>`;
+   if(info.isApple){const tag=document.createElement('div'); tag.className='mt-2 text-green-400 font-bold text-center drop-shadow'; tag.textContent='🍏 Apple Device Detected'; card.appendChild(tag);}
+   devicesEl.appendChild(card);
+ }
+ document.querySelectorAll('.connect-btn').forEach(b=>{b.onclick=async ()=>{const id=b.closest('div[data-id]').dataset.id; showLoading(true); await connect(seen.get(id).device); showLoading(false);};});
+ document.querySelectorAll('.analyze-btn').forEach(b=>{b.onclick=()=>{const id=b.closest('div[data-id]').dataset.id; analyze(seen.get(id));};});
+}
+function showLoading(show){ loadingOverlay.style.display=show?'flex':'none'; }
+async function connect(device){ try{ const server=await device.gatt.connect(); log('Connected to',device.name); await readDeviceInfo(server,device.id); await readAllServices(server,device.id);}catch(e){log('Connect error',e);}}
+async function readDeviceInfo(server,id){ try{ const svc=await server.getPrimaryService('device_information'); const chars=await svc.getCharacteristics(); const dec=new TextDecoder(); let info={}; for(const c of chars){ try{info[c.uuid]=dec.decode((await c.readValue()).buffer);}catch{} } seen.get(id).deviceInfo=info; log('Device Info:',JSON.stringify(info,null,2)); }catch{log('No Device Information Service');} }
+async function readAllServices(server,id){ try{ const services=await server.getPrimaryServices(); for(const svc of services){ const chars=await svc.getCharacteristics(); for(const c of chars){ try{ const val=await c.readValue(); seen.get(id)[`char_${c.uuid}`]=Array.from(new Uint8Array(val.buffer)); }catch{} } } }catch(e){log('readAllServices error',e);} }
+function analyze(info){ const res={}; if(info.device.id.includes(':')) res.macPrefix=info.device.id.split(':').slice(0,3).join(':').toUpperCase(); if(info.rssi && info.txPower){ const n=2.2; res.distance=Math.pow(10,(info.txPower-info.rssi)/(10*n)); info.distance=res.distance; } if(info.name){ if(/airpods|heart|hrm/i.test(info.name)) res.guess='Apple AirPods / Heart Rate Monitor'; else if(/tag|tracker/i.test(info.name)) res.guess='Tracker / Beacon'; else if(/sensor/i.test(info.name)) res.guess='Sensor'; } seen.get(info.device.id).analysis=res; log('Analysis',JSON.stringify(res,null,2));}
+async function startScan(){ try{ leScan=await navigator.bluetooth.requestLEScan({acceptAllAdvertisements:true,keepRepeatedDevices:true}); navigator.bluetooth.addEventListener('advertisementreceived',ev=>{ const id=ev.device.id; if(!seen.has(id)) seen.set(id,{device:ev.device,name:ev.device.name,rssi:ev.rssi,txPower:ev.txPower,rssiHistory:[ev.rssi]}); else{seen.get(id).rssi=ev.rssi;seen.get(id).txPower=ev.txPower;seen.get(id).rssiHistory.push(ev.rssi);} extendAppleDetection(seen.get(id)); renderDevices(); }); log('Scan started'); }catch(e){log('Scan error',e);} }
+function stopScan(){ if(leScan){leScan.stop(); leScan=null; log('Scan stopped');} }
+document.getElementById('btn-chooser').onclick=async()=>{ try{ const d=await navigator.bluetooth.requestDevice({acceptAllDevices:true,optionalServices:['device_information']}); seen.set(d.id,{device:d,name:d.name}); extendAppleDetection(seen.get(d.id)); renderDevices(); }catch(e){log('Device chooser cancelled or error',e);} };
+document.getElementById('btn-start-scan').onclick=startScan;
+document.getElementById('btn-stop-scan').onclick=stopScan;
+function isAppleMAC(id){ const prefixes=['88:1F:A1','F0:99:B6','60:4B:F6','28:E7:CF','D0:E7:82','AC:87:A3','BC:92:6B']; const mac=id.toUpperCase(); return prefixes.some(p=>mac.startsWith(p));}
+function extendAppleDetection(info){ const id=info.device.id; const name=info.name||''; let apple=false; if(isAppleMAC(id)) apple=true; if(/airpods|apple|beats/i.test(name)) apple=true; info.isApple=apple; if(apple){ log('Apple device detected:',name,id); }}
+</script>
+</body>
+</html>
